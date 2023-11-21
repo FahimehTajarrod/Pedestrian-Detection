@@ -1,0 +1,110 @@
+% PedistrainSearch.m
+%   This script applies a pre-trained HOG+CCF detector to a sample validation 
+%   image, reports the detector accuracy, and displays the image with true 
+%   positives drawn.
+
+addpath('./graphics/');
+
+
+% Read in the image to be searched.
+
+imageId=1; % ID number of the image should be ckecked at first
+
+img = imread(strcat('./Images/RGB/', num2str(imageId),'.jpg'));
+imgT = imread(strcat('./Images/Thermal/', num2str(imageId) ,'.jpg'));
+% Load the annotations file.
+
+load('./Images/GNT.mat');
+
+Temp1 = GNT(imageId);
+% Temp2 =Temp1{1};
+% goodRects=Temp2(imageId,:);
+goodRects=Temp1{1};
+% Write out the image with detection hits drawn on it.
+
+% "Plot" the image.
+hold off;
+subplot(2,2,2)
+imagesc(img);
+title('RGB Ground Truth')
+hold on;
+% Draw each of the detection hits.
+for i = 1 : size(goodRects, 1)
+    rect = goodRects(i, :);
+    
+    % Use this code to skip over drawing the false positives.
+    % Or, comment it out to draw the false positives as blue rectangles.
+%     if rect(end) == 0
+%         continue;
+%     end
+     if (rect(end)==1) ||(rect(end)==-1)
+          color = 'g';
+     else 
+          color = 'g:';
+     end
+    % Draw the results.
+    drawRectangle(goodRects(i, :), color);
+end
+subplot(2,2,4)
+imagesc(imgT);
+title('Thermal Ground Truth')
+hold on;
+
+% Draw each of the detection hits.
+for i = 1 : size(goodRects, 1)
+    rect = goodRects(i, :);
+    
+    % Use this code to skip over drawing the false positives.
+    % Or, comment it out to draw the false positives as blue rectangles.
+%     if rect(end) == 0
+%         continue;
+%     end
+    
+     if (rect(end)==1) ||(rect(end)==-1)
+          color = 'g';
+     else 
+          color = 'g:';
+     end
+    % Draw the results.
+    drawRectangle(goodRects(i, :), color);
+end
+subplot(2,2,1)
+imgSides=Sides(img,imgT);
+imagesc(imgSides);
+title('MLPD (Sides blackout) ')
+hold on;
+
+% Draw each of the detection hits.
+for i = 1 : size(goodRects, 1)
+    rect = goodRects(i, :);
+    
+    % Use this code to skip over drawing the false positives.
+    % Or, comment it out to draw the false positives as blue rectangles.
+    if rect(end) <1
+        continue;
+    end
+    
+    color = 'r';
+    % Draw the results.
+    drawRectangle(goodRects(i, :), color);
+end
+subplot(2,2,3)
+imgSurrounding=Surrounding(img,imgT);
+imagesc(imgSurrounding);
+title('MLPD (Surrounding blackout)')
+hold on;
+
+% Draw each of the detection hits.
+for i = 1 : size(goodRects, 1)
+    rect = goodRects(i, :);
+    
+    % Use this code to skip over drawing the false positives.
+    % Or, comment it out to draw the false positives as blue rectangles.
+    if rect(end) <1
+        continue;
+    end
+    
+    color = 'r';
+    % Draw the results.
+    drawRectangle(goodRects(i, :), color);
+end
